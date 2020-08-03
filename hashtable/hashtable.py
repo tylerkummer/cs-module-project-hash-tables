@@ -101,7 +101,7 @@ class HashTable:
         # Your code here
         hash_value = self.hash_index(key)
         if self.hash_table[hash_value] == None:
-            print("Doesn't Exist")
+            print("Warning: Key Does Not Exist!")
         else:
             self.hash_table[hash_value] = None
 
@@ -116,7 +116,7 @@ class HashTable:
         # Your code here
         hash_value = self.hash_index(key)
         if self.hash_table[hash_value] == None:
-            print("Doesn't Exist")
+            return None
         else:
             return self.hash_table[hash_value]
 
