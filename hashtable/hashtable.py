@@ -13,6 +13,60 @@ class HashTableEntry:
 MIN_CAPACITY = 8
 
 
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def find(self, key):
+        current = self.head
+
+        while current is not None:
+            if current.key == key:
+                return current
+            current = current.next
+
+        return current
+
+    def add_to_head(self, key, value):
+        current = self.head
+        while current is not None:
+            if current.key == key:
+                current.value = value
+                return
+            current = current.next
+
+        new_node = HashTableEntry(key, value)
+        new_node.next = self.head
+        self.head = new_node
+
+    def delete(self, key):
+        current = self.head
+
+        # Current is empty
+        if current is None:
+            return None
+
+        # Deletes Head
+        elif current.key == key:
+            self.head = current.next
+            return current
+
+        # Delete any other part
+        else:
+            previous = current
+            current = current.next
+
+            while current is not None:
+                if current.key == key:
+                    previous.next = current.next
+                    return current
+
+                else:
+                    previous = current
+                    current = current.next
+            return None
+
+
 class HashTable:
     """
     A hash table that with `capacity` buckets
