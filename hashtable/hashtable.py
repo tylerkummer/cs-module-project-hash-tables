@@ -13,7 +13,7 @@ class HashTableEntry:
 MIN_CAPACITY = 8
 
 
-class LinkedList:
+class HashLinkedList:
     def __init__(self):
         self.head = None
 
@@ -40,18 +40,19 @@ class LinkedList:
         self.head = new_node
 
     def delete(self, key):
+        # Create previous instance of the current head
         current = self.head
 
-        # Current is empty
+        # Check if head is empty and if so return None
         if current is None:
             return None
 
-        # Deletes Head
+        # Check for the key of the head
         elif current.key == key:
             self.head = current.next
             return current
 
-        # Delete any other part
+        # Cycle through any other part getting deleted
         else:
             previous = current
             current = current.next
@@ -79,6 +80,11 @@ class HashTable:
         # Your code here
         self.capacity = capacity
         self.hash_table = [None] * capacity
+        self.count = 0
+
+        # Cycle through the capacity and pushing them through the HashLinkedList class
+        for i in range(self.capacity):
+            self.hash_table[i] = HashLinkedList()
 
     def get_num_slots(self):
         """
@@ -100,7 +106,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        return self.count / self.capacity
 
     def fnv1(self, key):
         """
@@ -141,8 +147,25 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_value = self.hash_index(key)
-        self.hash_table[hash_value] = value
+        # hash_value = self.hash_index(key)
+        # self.hash_table[hash_value] = value
+
+        # Create index of the hash key
+        index = self.hash_index(key)
+        # Create a current_node of the hash table to find the associated key
+        current_node = self.hash_table[index].find(key)
+
+        # Check if load factor is above 0.7 and if it is then double capacity size
+        if self.get_load_factor() > 0.7:
+            self.resize(self.capacity * 2)
+
+        # Check if our current node exists and assign it to value
+        if current_node:
+            current_node.value = value
+        # If not then add it to the head and add our count by 1
+        else:
+            self.hash_table[index].add_to_head(key, value)
+            self.count += 1
 
     def delete(self, key):
         """
@@ -153,11 +176,23 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_value = self.hash_index(key)
-        if self.hash_table[hash_value] == None:
-            print("Warning: Key Does Not Exist!")
+        # hash_value = self.hash_index(key)
+        # if self.hash_table[hash_value] == None:
+        #     print("Warning: Key Does Not Exist!")
+        # else:
+        #     self.hash_table[hash_value] = None
+
+        # Create index of hash
+        index = self.hash_index(key)
+        # Pass our current index through our delete method and pass the key to that method to remove from the table
+        current_node = self.hash_table[index].delete(key)
+
+        # Check if the current_node to delete exists and if not print warning message
+        if current_node is None:
+            print("Warning Key Does Not Exist")
+        # If it exists subtract our total count
         else:
-            self.hash_table[hash_value] = None
+            self.count -= 1
 
     def get(self, key):
         """
@@ -168,11 +203,23 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash_value = self.hash_index(key)
-        if self.hash_table[hash_value] == None:
+        # hash_value = self.hash_index(key)
+        # if self.hash_table[hash_value] == None:
+        #     return None
+        # else:
+        #     return self.hash_table[hash_value]
+
+        # Create index of our hash table
+        index = self.hash_index(key)
+        # Try to retrieve the current node using the find method in our LL class
+        current_node = self.hash_table[index].find(key)
+
+        # Check if current node exists and if not return None
+        if current_node is None:
             return None
+        # If current node exists return the value
         else:
-            return self.hash_table[hash_value]
+            return current_node.value
 
     def resize(self, new_capacity):
         """
@@ -182,7 +229,28 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        pass
+        # Create variable for our current table which will become our previous table
+        prev_table = self.hash_table
+        # Rehash the table using the new_capacity
+        rehash_table = [None] * new_capacity
+
+        # Cycle through the new capacity and pass each index to our LL class
+        for i in range(new_capacity):
+            rehash_table[i] = HashLinkedList()
+
+        # Reassign our initial values of our previous __init__ function
+        self.hash_table = rehash_table
+        self.capacity = new_capacity
+        self.count = 0
+
+        # Cycle through our previous table and assign head to it
+        for i in prev_table:
+            head_value = i.head
+
+            # Check if the head exists and put the values there with the put class along with reassigning the value of the head to the next index
+            while head_value:
+                self.put(head_value.key, head_value.value)
+                head_value = head_value.next
 
 
 if __name__ == "__main__":
